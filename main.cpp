@@ -256,7 +256,7 @@ void StartMenu() {
     FEHImage startMenu;
     int cord[2];
     // Open the image
-    startMenu.Open("Pre-GameScreens/Start Menu.png");
+    startMenu.Open("Pre-GameScreens/StartMenu.png");
     startMenu.Draw(0, 0);
     //play button (95,130) & (225,100)
     Button startMenuPlay = Button("play", 95, 130, 225, 100);
@@ -414,85 +414,141 @@ int GenerateCardValue(string CardName){
 void BlackJackGame()
 {
     // screen 320x240
-    //betting amount
+    // betting amount
+    ifstream statsFileIn("statistics.txt");  // Open the file to read initial data
+    
     FEHImage BettingScreen;
-    FEHImage Wipe;
+    FEHImage Warning;
     int cord[2];
     int bank = 1000;
+    int numGames = 0;
+    statsFileIn >> bank;
+    statsFileIn >> numGames;  // Read bank and numGames
+    cout << "Bank count:" << bank << endl;
+    cout << "Game Count:" << numGames << endl;
+    statsFileIn.close();  // Close after reading the initial values
+    
     int betAmt = 0;
     string betAmtStr;
+    int illegalAmount = 0;
     bool dealt = false;
-    BettingScreen.Open("BettingScreen.png");
+    Warning.Open("SDP_Images/betWarning.png");
+    BettingScreen.Open("SDP_Images/BettingScreen.png");
     BettingScreen.Draw(0,0);
 
-    
     LCD.SetFontColor(WHITE);
-    LCD.WriteAt("0", 150, 100);
+    // update bet amt value on screen
+    LCD.WriteAt(betAmt, 150, 100);
+    // update bank value on screen
+    LCD.WriteAt(bank, 92, 45);
 
-
-    
     Button oneChip = Button("oneChip", 43, 175, 80, 139);
     Button fiveChip = Button("fiveChip", 82, 175, 120, 139);
     Button twentyFiveChip = Button("twentyFiveChip", 122, 175, 158, 139);
     Button fiftyChip = Button("fiftyChip", 161, 175, 197, 139);
     Button hundredChip = Button("hundredChip", 200, 175, 237, 139);
     Button fiveHundredChip = Button("fiveHundredChip", 240, 175, 278, 139);
+    Button allIn = Button("all in", 56, 83, 97, 68);
     Button deal = Button("deal", 242, 106, 306, 78);
-    //create back button
+    // create back button
     Button playMenuBack = Button("back", 10, 230, 75, 210);
 
-    Button buttonArr[8] = {playMenuBack, oneChip, fiveChip, twentyFiveChip, fiftyChip, hundredChip, fiveHundredChip, deal};
+    Button buttonArr[9] = {playMenuBack, oneChip, fiveChip, twentyFiveChip, fiftyChip, hundredChip, fiveHundredChip, deal, allIn};
     while(!dealt){
-        Cord(cord);
-        string buttonPressed = checkButtonPressed(buttonArr, 8, cord);
+    Cord(cord);
+    string buttonPressed = checkButtonPressed(buttonArr, 9, cord);
 
-
-
-        if (buttonPressed.compare(oneChip.getName()) == 0) {
+    if (buttonPressed.compare(oneChip.getName()) == 0) {
+        if(bank >= 1){
             bank -= 1;
             betAmt += 1;
             cout << "Button pressed: oneChip" << endl;
-        } else if (buttonPressed.compare("fiveChip") == 0) {
+        }
+        else{
+            illegalAmount = 1;  // Not enough money to place a 1-chip bet
+        }
+    } else if (buttonPressed.compare("fiveChip") == 0) {
+        if (bank >= 5) {
             bank -= 5;
             betAmt += 5;
             cout << "Button pressed: fiveChip" << endl;
-        } else if (buttonPressed.compare("twentyFiveChip") == 0) {
+        } else {
+            illegalAmount = 5;  // Not enough money to place a 5-chip bet
+        }
+    } else if (buttonPressed.compare("twentyFiveChip") == 0) {
+        if (bank >= 25) {
             bank -= 25;
             betAmt += 25;
             cout << "Button pressed: twentyFiveChip" << endl;
-        } else if (buttonPressed.compare("fiftyChip") == 0) {
+        } else {
+            illegalAmount = 25;  // Not enough money to place a 25-chip bet
+        }
+    } else if (buttonPressed.compare("fiftyChip") == 0) {
+        if (bank >= 50) {
             bank -= 50;
             betAmt += 50;
             cout << "Button pressed: fiftyChip" << endl;
-        } else if (buttonPressed.compare("hundredChip") == 0) {
+        } else {
+            illegalAmount = 50;  // Not enough money to place a 50-chip bet
+        }
+    } else if (buttonPressed.compare("hundredChip") == 0) {
+        if (bank >= 100) {
             bank -= 100;
             betAmt += 100;
             cout << "Button pressed: hundredChip" << endl;
-        } else if (buttonPressed.compare("fiveHundredChip") == 0) {
+        } else {
+            illegalAmount = 100;  // Not enough money to place a 100-chip bet
+        }
+    } else if (buttonPressed.compare("fiveHundredChip") == 0) {
+        if (bank >= 500) {
             bank -= 500;
             betAmt += 500;
             cout << "Button pressed: fiveHundredChip" << endl;
-        } else if (buttonPressed.compare("deal") == 0) {
-            cout << "Button pressed: deal" << endl;
-            dealt = true;
-        } else if (buttonPressed.compare("all in") == 0) {
-            cout << "Button pressed: all in" << endl;
-            dealt = true;
-            betAmt = bank + betAmt;
-            bank = 0;
         } else {
-            cout << "Unknown button pressed!" << endl;
-            cout << "Cord Pressed was, (" << cord[0] << "," << cord[1] << ")" << endl;
+            illegalAmount = 500;  // Not enough money to place a 500-chip bet
         }
+    } else if (buttonPressed.compare("deal") == 0) {
+        cout << "Button pressed: deal" << endl;
+        dealt = true;
+    } else if (buttonPressed.compare("all in") == 0) {
+        cout << "Button pressed: all in" << endl;
+        dealt = true;
+        betAmt = bank + betAmt;
+        bank = 0;
+    } else if (buttonPressed.compare("back") == 0) {
+        ofstream statsFileOut("statistics.txt");  // Open file to save updates
+        bank += betAmt;  // Update the bank balance
+        betAmt = 0;  // Reset bet amount
 
-        LCD.SetFontColor(BLACK);
-        LCD.FillRectangle(150, 100, 40, 20);
+        // Save the updated values back to the file
+        statsFileOut << bank << endl;
+        statsFileOut << numGames << endl;
+        statsFileOut.close();  // close file
 
-        LCD.SetFontColor(WHITE);
-        LCD.WriteAt(to_string(betAmt), 150, 100);
-        
-
+        PlayMenu();  // Go back to the play menu
+    } else {
+        cout << "Unknown button pressed!" << endl;
+        cout << "Cord Pressed was, (" << cord[0] << "," << cord[1] << ")" << endl;
     }
+
+    if(illegalAmount > 0){
+        Warning.Draw(10,200);
+    }
+    illegalAmount = 0;
+
+    // changes color to background color(a shade of green)
+    LCD.SetFontColor(0x388E3C);
+    // erases the previous values for bank and bet amt on screen
+    //clears Bet
+    LCD.FillRectangle(150, 100, 80, 20);
+    //clears bank
+    LCD.FillRectangle(92, 45, 100, 20);
+
+    LCD.SetFontColor(WHITE);
+    LCD.WriteAt(to_string(betAmt), 150, 100);
+    LCD.WriteAt(to_string(bank), 92, 45);
+}
+
 
     int restart =1;
     string CardName, PlayerFirstCard, PlayerSecondCard, DealerFirstCard, DealerHiddenCard;
