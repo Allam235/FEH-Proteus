@@ -636,14 +636,217 @@ void BlackJackGame()
         LCD.WriteAt("Player 1 Wins",140,142); // Check if the values of the two cards are equal to 21 
         Sleep(5.0);
     }
-    else{
-        //Redraw the screen to ask whether to give the player another card.
-
-    }
     
-    Sleep(10000);
+LCD.Clear();
+
+FEHImage QuestionScreen; //ask the player to stay or get another card
+QuestionScreen.Open("SDP_Images/BlackJack_Question.png");
+QuestionScreen.Draw(0,0);
+
+
+CardBacks.Open("SDP_Images/Back_of_Card.png");
+CardBacks.Draw(160,40);
+Sleep(0.5);
+
+CardLoco = ("SDP_Images/" + PlayerFirstCard + ".png");
+PlayerCardOneImg.Open(CardLoco.data());
+PlayerCardOneImg.Draw(110,170);
+Sleep(0.5);
+
+
+CardLoco = ("SDP_Images/" + PlayerSecondCard + ".png");
+PlayerCardTwoImg.Open(CardLoco.data());
+PlayerCardTwoImg.Draw(140,170);
+Sleep(0.5);
+
+
+CardLoco = "SDP_Images/" + DealerFirstCard + ".png";
+DealerCardOneImg.Open(CardLoco.data());
+DealerCardOneImg.Draw(130,40);
+Sleep(0.5);
+
+//Add buttons to the options on the screen
+
+Button stay = Button("Stay",22,200,55,163);
+
+Button oneMore = Button("OneMore",271,200,303,168);
+
+Button buttonarr1[2] = {stay , oneMore};
+
+while(true){
+    Cord(cord1);
+
+    string buttonPressed1 = checkButtonPressed(buttonarr1, 2 , cord1);
+
+    if(buttonPressed1.compare("Stay") == 0){
+        cout << "Stay" << endl;
+        //Call function for stay
+        Sleep(2.0);
+        Stay( DealerHiddenCard, CardLoco);
+        Sleep(1.5);
+        //If the dealer has 21, the game is over.
+        if ((DealerCard1Value + DealerCard2Value) == 21){
+            LCD.WriteAt("Dealer Wins",140,142);
+            Sleep(8.0);
+            break;
+        }
+        if (DealerTotal>PlayerTotal){
+            LCD.WriteAt("Dealer Wins",140,142);
+            Sleep(8.0);
+            break;
+        }
+
+
+        //If the dealer has less than a value of 16, the dealer will get another card unless his value is already higher than the players value
+        if((DealerCard1Value+DealerCard2Value)<16){
+            string DealerThirdCard;
+            FEHImage DealerCardThreeImg;
+            int DealerCard3Value;
+            DealerThirdCard = GenerateCardName();
+            Sleep(0.5);
+            CardLoco = ("SDP_Images/" + DealerThirdCard + ".png");
+            DealerCardThreeImg.Open(CardLoco.data());
+            DealerCardThreeImg.Draw(190,40);
+            Sleep(0.5);
+            DealerCard3Value = GenerateCardValue(DealerThirdCard);
+            DealerTotal = DealerCard1Value+DealerCard2Value+DealerCard3Value;
+            if ((DealerTotal) == 21){
+            LCD.WriteAt("Dealer Wins",140,142);
+            Sleep(8.0);
+            break;
+            }
+            if((DealerTotal)>21){
+            LCD.WriteAt("Player 1 Wins",140,142);
+            Sleep(8.0);
+            break;    
+            }
+            if (DealerTotal>PlayerTotal){
+            LCD.WriteAt("Dealer Wins",140,142);
+            Sleep(8.0);
+            break;
+            }
+            if((DealerCard1Value+DealerCard2Value+DealerCard3Value)<16){
+                string DealerFourthCard;
+                FEHImage DealerCardFourImg;
+                int DealerCard4Value;
+                DealerFourthCard = GenerateCardName();
+                Sleep(0.5);
+                CardLoco = ("SDP_Images/" + DealerFourthCard + ".png");
+                DealerCardFourImg.Open(CardLoco.data());
+                DealerCardFourImg.Draw(220,40);
+                Sleep(0.5);
+                DealerCard4Value = GenerateCardValue(DealerFourthCard);
+                DealerTotal = DealerCard1Value+DealerCard2Value+DealerCard3Value+DealerCard4Value;
+                if ((DealerTotal) == 21){
+                LCD.WriteAt("Dealer Wins",140,142);
+                Sleep(8.0);
+                break;
+                }
+                if((DealerTotal)>21){
+                LCD.WriteAt("Player 1 Wins",140,142);
+                Sleep(8.0);
+                break;    
+                }
+                if (DealerTotal>PlayerTotal){
+                LCD.WriteAt("Dealer Wins",140,142);
+                Sleep(8.0);
+                break;
+                }
+                if((DealerTotal)<16){
+                    string DealerFifthCard;
+                    FEHImage DealerCardFiveImg;
+                    int DealerCard5Value;
+                    DealerFifthCard = GenerateCardName();
+                    Sleep(0.5);
+                    CardLoco = ("SDP_Images/" + DealerFifthCard + ".png");
+                    DealerCardFiveImg.Open(CardLoco.data());
+                    DealerCardFiveImg.Draw(90,40);
+                    Sleep(0.5);
+                    DealerCard5Value = GenerateCardValue(DealerFifthCard);
+                    DealerTotal = DealerCard1Value+DealerCard2Value+DealerCard3Value+DealerCard4Value+DealerCard5Value;
+                    if ((DealerTotal) == 21){
+                    LCD.WriteAt("Dealer Wins",140,142);
+                    Sleep(8.0);
+                    break;
+                    }
+                    if((DealerTotal)>21){
+                    LCD.WriteAt("Player 1 Wins",140,142);
+                    Sleep(8.0);
+                    break;    
+                    }
+                    if (DealerTotal>PlayerTotal){
+                    LCD.WriteAt("Dealer Wins",140,142);
+                    Sleep(8.0);
+                    break;
+                    }
+                    
+                }
+            }
+
+        }
+        //If the dealer has a value of sixteen, the dealer will stay
+
+        //If the dealer gets a new card and his new total value is over 21, the game is over and the player wins.
+
+        // Once the dealer has stayed, decide the winner and write the winner to the screen
+    
+    
+    }
+    if (buttonPressed1.compare("OneMore") == 0){
+        cout << "One More Card" << endl;
+        //function to add one more card
+        string PlayerThirdCard;   
+        OneMore(CardLoco, PlayerThirdCard);
+        //Calculate the value of the new card and the new total value
+        int PlayerCard3Value;
+        PlayerCard3Value = GenerateCardValue(PlayerThirdCard);
+        PlayerTotal = PlayerTotal + PlayerCard3Value;
+
+        //If the new total value is equal to 21, the game is over and the player wins
+        if(PlayerTotal == 21){
+            LCD.WriteAt("Player 1 Wins",140,142);
+            Sleep(8.0);
+            break;    
+        }
+        //If the new total value is over 21, the game is over and the player loses.
+        if(PlayerTotal>21){
+            LCD.WriteAt("Dealer Wins",140,142);
+            Sleep(8.0);
+            break;
+        }
+        //Ask the player if he wants a new card or to stay
+        }
+}
+
+
+
+
 
 }
 
 
+
+void Stay(string DealerHiddenCard, string CardLoco){
+    //Write the value of the players cards to the screen.
+
+    //Flip over the second dealer card.
+    FEHImage DealerCardTwoImg;
+    Sleep(0.5);
+    CardLoco = ("SDP_Images/" + DealerHiddenCard + ".png");
+    DealerCardTwoImg.Open(CardLoco.data());
+    DealerCardTwoImg.Draw(160,40);
+    Sleep(0.5);
+}
+
+
+void OneMore(string CardLoco, string PlayerThirdCard){
+    //Call the generate function to get another card
+    FEHImage PlayerCardThreeImg;
+    PlayerThirdCard = GenerateCardName();
+    Sleep(0.5);
+    CardLoco = ("SDP_Images/" + PlayerThirdCard + ".png");
+    PlayerCardThreeImg.Open(CardLoco.data());
+    PlayerCardThreeImg.Draw(170,170);
+    Sleep(0.5);
+}
     
